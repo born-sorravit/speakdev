@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { LogOut, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -71,6 +72,7 @@ export default function ProfilePage() {
   const profile = useAppStore((s) => s.profile);
   const updateProfile = useAppStore((s) => s.updateProfile);
   const reset = useAppStore((s) => s.reset);
+  const signOut = useAppStore((s) => s.signOut);
 
   function toggleTopic(topic: string) {
     const current = profile.preferredTopics;
@@ -117,6 +119,20 @@ export default function ProfilePage() {
             Software Developer → Month 2 &amp; 3 unlock developer lessons.
           </p>
         </div>
+
+        {/* The account's own page is where sign-out is always findable. */}
+        <Separator />
+        <Button
+          variant="outline"
+          className="text-th w-full gap-2 sm:w-auto"
+          onClick={() => {
+            signOut();
+            router.push("/");
+          }}
+        >
+          <LogOut className="size-4" aria-hidden="true" />
+          {t.common.signOut}
+        </Button>
       </Section>
 
       <Section title={t.profile.learning}>

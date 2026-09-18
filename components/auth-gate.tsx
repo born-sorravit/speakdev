@@ -24,14 +24,24 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
   }, [hasHydrated, isAuthenticated, router]);
 
   if (!hasHydrated || !isAuthenticated) {
+    // Shaped like a real page — heading, hero card, tiles — and inside the
+    // shell's `<main>`, so the padding and width come from the same place the
+    // content will use and nothing jumps when it arrives.
     return (
-      <div className="mx-auto max-w-5xl space-y-4 p-4" aria-busy="true">
-        <Skeleton className="h-9 w-56" />
-        <Skeleton className="h-40 w-full rounded-2xl" />
+      <div className="mx-auto max-w-4xl space-y-6" aria-busy="true">
+        <div className="space-y-2.5">
+          <Skeleton className="h-7 w-56 max-w-full" />
+          <Skeleton className="h-4 w-72 max-w-full" />
+        </div>
+        <Skeleton className="h-44 w-full rounded-2xl" />
         <div className="grid grid-cols-3 gap-3">
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
-          <Skeleton className="h-32 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+          <Skeleton className="h-28 rounded-xl" />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Skeleton className="h-24 rounded-xl" />
+          <Skeleton className="h-24 rounded-xl" />
         </div>
       </div>
     );

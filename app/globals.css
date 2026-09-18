@@ -193,4 +193,18 @@
   .blob {
     border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
   }
+
+  /*
+   * Strips that scroll sideways on a phone — tab rails, chip rows — where a
+   * visible scrollbar would eat into an already short control. The generated
+   * `components/ui/command.tsx` expects this class to exist too.
+   */
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }

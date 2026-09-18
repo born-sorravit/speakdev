@@ -9,6 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { SpeakButton } from "@/components/speak-button";
@@ -36,8 +37,22 @@ function makeId() {
 }
 
 export default function ConversationPage() {
+  // `useSearchParams` needs a Suspense boundary above it on a prerendered
+  // route, so the page body lives in its own component.
+  return (
+    <React.Suspense fallback={null}>
+      <ConversationView />
+    </React.Suspense>
+  );
+}
+
+function ConversationView() {
+  const requested = useSearchParams().get("scenario");
+
+  // Seeded from the URL (the quick-jump palette links straight to a scenario)
+  // and owned by this component from then on.
   const [scenario, setScenario] = React.useState<ConversationScenario | null>(
-    null,
+    () => SCENARIOS.find((item) => item.id === requested) ?? null,
   );
 
   if (!scenario) {
@@ -79,9 +94,9 @@ function ScenarioPicker({
         value={group}
         onValueChange={(value) => setGroup(value as ScenarioGroup)}
       >
-        <TabsList className="mb-5 w-full">
+        <TabsList className="no-scrollbar mb-5 flex w-full justify-start overflow-x-auto">
           {groups.map((item) => (
-            <TabsTrigger key={item.id} value={item.id} className="flex-1">
+            <TabsTrigger key={item.id} value={item.id} className="shrink-0 sm:flex-1">
               {item.label}
             </TabsTrigger>
           ))}

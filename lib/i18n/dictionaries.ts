@@ -21,6 +21,30 @@ export const en = {
     profile: "Profile",
   },
 
+  /** Section headings in the desktop sidebar. */
+  navGroups: {
+    overview: "Overview",
+    learning: "Learning",
+    account: "Account",
+  },
+
+  sidebar: {
+    collapse: "Collapse menu",
+    expand: "Expand menu",
+    startToday: "Start today's lesson",
+  },
+
+  /** Quick-jump palette (⌘K). */
+  search: {
+    open: "Search",
+    placeholder: "Search lessons, words, scenarios…",
+    empty: "Nothing matched.",
+    pages: "Pages",
+    lessons: "Lessons",
+    vocabulary: "Vocabulary",
+    scenarios: "Scenarios",
+  },
+
   common: {
     start: "Start",
     continue: "Continue",
@@ -316,6 +340,28 @@ export const th: Dictionary = {
     progress: "ความคืบหน้า",
     vocabulary: "คำศัพท์",
     profile: "โปรไฟล์",
+  },
+
+  navGroups: {
+    overview: "ภาพรวม",
+    learning: "เรียนและฝึก",
+    account: "บัญชี",
+  },
+
+  sidebar: {
+    collapse: "ย่อเมนู",
+    expand: "ขยายเมนู",
+    startToday: "เริ่มบทเรียนวันนี้",
+  },
+
+  search: {
+    open: "ค้นหา",
+    placeholder: "ค้นหาบทเรียน คำศัพท์ หรือสถานการณ์…",
+    empty: "ไม่พบสิ่งที่ค้นหา",
+    pages: "หน้า",
+    lessons: "บทเรียน",
+    vocabulary: "คำศัพท์",
+    scenarios: "สถานการณ์สนทนา",
   },
 
   common: {

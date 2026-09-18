@@ -90,5 +90,13 @@ export const feedbackIn: Variants = {
   },
 };
 
-/** Default `viewport` for scroll reveals: fire once, slightly before entry. */
-export const viewportOnce = { once: true, margin: "-60px" } as const;
+/**
+ * Default `viewport` for scroll reveals: fire once, slightly before entry.
+ *
+ * The margin is **vertical only**. `"-60px"` shrinks the observer root on all
+ * four sides, so on a narrow screen anything within 60px of the left or right
+ * edge never intersects and never animates — which is how the vocabulary
+ * "due today" counter sat at 0 on a phone while showing the real number on
+ * desktop, where the sidebar pushes content clear of the inset.
+ */
+export const viewportOnce = { once: true, margin: "-60px 0px" } as const;

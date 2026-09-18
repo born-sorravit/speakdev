@@ -142,33 +142,41 @@ export default function ProgressPage() {
   const unresolved = mistakes.filter((m) => !m.resolved);
   const resolved = mistakes.filter((m) => m.resolved);
 
+  // Keyed on `id` below, never on `label`: labels are translated, so a locale
+  // change would remount every MeterRow and drop its bar back to zero.
   const skillRows = [
     {
+      id: "speaking",
       label: t.dashboard.speaking,
       value: skills.speaking,
       tone: "primary" as const,
     },
     {
+      id: "listening",
       label: t.progress.listening,
       value: skills.listening,
       tone: "chart-2" as const,
     },
     {
+      id: "vocabulary",
       label: t.nav.vocabulary,
       value: skills.vocabulary,
       tone: "chart-3" as const,
     },
     {
+      id: "grammar",
       label: t.progress.grammar,
       value: skills.grammar,
       tone: "chart-4" as const,
     },
     {
+      id: "conversation",
       label: t.nav.conversation,
       value: skills.conversation,
       tone: "primary" as const,
     },
     {
+      id: "workplace",
       label: t.progress.workplace,
       value: skills.workplace,
       tone: "chart-2" as const,
@@ -256,7 +264,7 @@ export default function ProgressPage() {
           </p>
           {skillRows.map((row) => (
             <MeterRow
-              key={row.label}
+              key={row.id}
               label={row.label}
               value={row.value}
               tone={row.tone}

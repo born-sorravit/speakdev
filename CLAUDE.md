@@ -45,6 +45,12 @@ mapping CSS custom properties to Tailwind tokens. Extend the theme there.
   through per-glyph. Geist has **no Thai coverage** — never drop the Thai face from the stack.
 - Use the `.text-th` utility on any element that can render Thai; tone marks and stacked vowels
   clip at the default leading.
+- **A `TabsList` never wraps.** It has a fixed height, so a second row spills outside the pill —
+  which is exactly what the seven vocabulary categories did on a phone. Give the list
+  `no-scrollbar flex w-full justify-start overflow-x-auto` and the triggers
+  `shrink-0 sm:flex-1`: the rail scrolls sideways when it must and still stretches once there is
+  room. `.no-scrollbar` is defined in `globals.css` alongside `.text-th`; the generated
+  `components/ui/command.tsx` expects it to exist as well.
 
 ## shadcn/ui
 
@@ -80,6 +86,51 @@ Mock-data frontend, shaped so a real backend drops in without touching component
 - `app/(app)/` — route group giving every signed-in page the sidebar/bottom-nav shell while
   keeping URLs flat.
 
+## App shell
+
+`components/layout/app-shell.tsx` owns the signed-in chrome.
+
+- **The desktop sidebar is `sticky top-0 h-dvh`, not a stretched flex item.** As a plain
+  column it took the height of the document, so on a long route the footer (streak card,
+  account row, sign-out) sat below the fold. The nav scrolls in its own `overflow-y-auto`
+  region so the footer stays grounded.
+- **Collapse state lives in the store** (`sidebarCollapsed` + `toggleSidebar`) and is
+  persisted, so the rail survives a reload; `reset()` keeps it, like `locale`. Width is
+  animated by Motion on the shared `transition` token rather than a Tailwind
+  `transition-[width]`, so the rail and the `layoutId` pill — which re-measures on the same
+  render — move together.
+- **Nav sections come from `lib/nav.ts`.** Every `NavItem` carries a `group`, and
+  `NAV_GROUPS` sets the order; labels are `t.navGroups[group]`. The collapsed rail swaps the
+  labels for separators and puts each item's name in a tooltip.
+- **Quick-jump (⌘K) is one provider, not one widget.** `components/layout/quick-jump.tsx`
+  mounts the dialog and the key listener once in `AppShell`; the sidebar field and the mobile
+  header button are triggers that call `useQuickJump()`. Two independent copies would both
+  answer the shortcut and stack two dialogs. Items carry their English *and* Thai text in
+  cmdk's `value`, which is what makes a Thai query match.
+- **`AuthGate` sits inside `AppShell`, not around it.** The store rehydrates a beat after
+  mount; gating the whole shell meant a phone painted loose skeleton blocks on an empty
+  background and then dropped the entire app in at once. The chrome renders immediately and
+  only `<main>` waits. The personal values in the chrome (streak, XP, level, name, email,
+  avatar monogram) are gated on `hasHydrated` behind same-size skeletons, so nothing shows a
+  default that then changes — and skeletons drawn on the accent panel need
+  `bg-sidebar-accent-foreground/15`, because `bg-muted` is nearly the panel's own colour in
+  light mode.
+- **Sign-out has three homes, none of them a stray button.** Desktop: behind the sidebar's
+  account row, as a `destructive` item in the same dropdown as Profile (`AccountMenu`, shared
+  by the expanded row and the collapsed rail's avatar). Mobile: the last entry of the drawer's
+  `account` group, beside Profile. Permanent: the account section of `/profile`. Don't
+  reintroduce a full-width sign-out under the nav — it reads as one more menu item and sits
+  where a mis-tap is easy.
+- **Mobile gets the whole menu in a drawer.** The bottom bar only fits the five `primary`
+  routes, so Progress and Profile had no way in on a phone. `components/layout/mobile-menu.tsx`
+  (a Sheet behind the header avatar) carries the full grouped nav, the account, streak/XP and
+  the language/theme controls — those two moved out of the header because it cannot hold them
+  next to the menu button at 390px. Anything added to `NAV_ITEMS` shows up there automatically;
+  the tab bar still only shows `primary` items, and `grid-cols-5` assumes there are five.
+- **Palette deep links:** lessons use `/learn/{id}`; scenarios and vocabulary use
+  `?scenario=` and `?q=`, read once with `useSearchParams` to seed local state. Both pages
+  therefore need a `Suspense` boundary above that read or the prerender fails.
+
 ## Animation (Motion)
 
 `motion` v13 (the motion.dev package, which re-exports framer-motion). Import from
@@ -103,6 +154,11 @@ Mock-data frontend, shaped so a real backend drops in without touching component
   are in view on load, so they roll up on **every** visit to that page, not just the first.
   That is the requested behaviour; if it ever reads as repetitive, gate the effect on a
   module-level "already counted" set rather than removing it.
+- **`viewportOnce`'s margin is vertical-only, and must stay that way.** A bare `"-60px"`
+  shrinks the IntersectionObserver root on all four sides, so on a phone anything within 60px
+  of the left or right edge never intersects and never animates. That is why the vocabulary
+  "due today" counter read 0 on mobile while desktop — where the sidebar pushes content clear
+  of the inset — showed the real number. Any new margin needs an explicit horizontal `0px`.
 - **Reveal-on-scroll must still track later changes.** `MeterRow` uses `useInView` + `animate`,
   not `whileInView`: a `once: true` `whileInView` fires and then ignores value changes, so a bar
   would freeze at its first reading after the learner completes a lesson.
@@ -112,6 +168,17 @@ Mock-data frontend, shaped so a real backend drops in without touching component
 - **`AnimatePresence` needs `mode="wait"`** wherever a click follows the transition (lesson
   stages, practice questions, vocabulary review). With the default `sync`, the exiting panel is
   still mounted, so a fast click can land on the screen the learner just left.
+- **Never key an animated list on translated text.** A `variants` child under a
+  `whileInView` + `once: true` parent gets its "show" variant pushed down by the parent at the
+  moment the viewport observer fires — and with `once` that observer is then gone. Change the
+  locale and a `key={title}` child unmounts; the replacement mounts with
+  `whileInView.isActive === false`, so it inherits `initial="hidden"` and is stranded at
+  `opacity: 0`. Dropping `once` is **not** the fix — `setActive` early-returns while the type is
+  already active, so the new child stays hidden until the parent leaves and re-enters the
+  viewport; with `once` it never recovers. Keys in animated lists must be locale-independent
+  (`id`, `href`, an index-free slug) — the landing `features` array and `progress`
+  `skillRows` carry an explicit `id` for exactly this reason. The same remount also resets
+  `AnimatedNumber` to 0 and `MeterRow`'s bar to empty until they re-enter the viewport.
 - **Never share a `layoutId` between the sidebar and the bottom nav.** Both are always in the
   DOM — only CSS hides one — so a shared id makes Motion animate between two visible-to-it
   elements. They use `sidebar-active` and `bottomnav-active`.

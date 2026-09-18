@@ -2,6 +2,7 @@
 
 import { BookOpen, Check, Eye, RotateCcw, Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useSearchParams } from "next/navigation";
 import * as React from "react";
 
 import { SpeakButton } from "@/components/speak-button";
@@ -29,6 +30,16 @@ const CATEGORIES: Array<VocabularyCategory | "all"> = [
 ];
 
 export default function VocabularyPage() {
+  // `useSearchParams` (read by the list) needs a Suspense boundary above it
+  // on a prerendered route.
+  return (
+    <React.Suspense fallback={null}>
+      <VocabularyView />
+    </React.Suspense>
+  );
+}
+
+function VocabularyView() {
   const [reviewing, setReviewing] = React.useState(false);
 
   if (reviewing) {
@@ -64,7 +75,9 @@ function VocabularyList({ onStartReview }: { onStartReview: () => void }) {
   const [category, setCategory] = React.useState<VocabularyCategory | "all">(
     "all",
   );
-  const [query, setQuery] = React.useState("");
+  // Seeded from `?q=` so the quick-jump palette can land on a single word.
+  const initialQuery = useSearchParams().get("q") ?? "";
+  const [query, setQuery] = React.useState(initialQuery);
 
   const due = hydrated ? dueVocabulary() : [];
 
@@ -142,9 +155,14 @@ function VocabularyList({ onStartReview }: { onStartReview: () => void }) {
           value={category}
           onValueChange={(v) => setCategory(v as VocabularyCategory | "all")}
         >
-          <TabsList className="flex w-full flex-wrap">
+          {/*
+            Scrolls sideways instead of wrapping: the list has a fixed height,
+            so a wrapped second row spilled outside the pill on a phone. Tabs
+            still stretch to fill the rail once there is room for them.
+          */}
+          <TabsList className="no-scrollbar flex w-full justify-start overflow-x-auto">
             {CATEGORIES.map((c) => (
-              <TabsTrigger key={c} value={c} className="flex-1 text-xs">
+              <TabsTrigger key={c} value={c} className="shrink-0 text-xs sm:flex-1">
                 {categoryLabels[c]}
               </TabsTrigger>
             ))}

@@ -130,11 +130,21 @@ function Hero() {
             className="mt-10 grid max-w-lg grid-cols-3 gap-4"
           >
             {[
-              { count: 90, suffix: "", label: t.landing.stat1 },
-              { count: LESSONS.length, suffix: "+", label: t.landing.stat2Label },
-              { count: SCENARIOS.length, suffix: "", label: t.landing.stat3Label },
+              { id: "days", count: 90, suffix: "", label: t.landing.stat1 },
+              {
+                id: "lessons",
+                count: LESSONS.length,
+                suffix: "+",
+                label: t.landing.stat2Label,
+              },
+              {
+                id: "scenarios",
+                count: SCENARIOS.length,
+                suffix: "",
+                label: t.landing.stat3Label,
+              },
             ].map((stat) => (
-              <div key={stat.label}>
+              <div key={stat.id}>
                 <dt className="text-2xl font-bold tracking-tight">
                   <AnimatedNumber value={stat.count} />
                   {stat.suffix}
@@ -214,15 +224,34 @@ function Hero() {
 function Features() {
   const { t } = useI18n();
 
+  // `id`, not `title`, is the list key below: the titles are translated, so
+  // keying on them remounts every card when the locale changes — see the note
+  // in CLAUDE.md about `whileInView` and remounted variant children.
   const features = [
-    { icon: Languages, title: t.landing.f1Title, body: t.landing.f1Body },
     {
+      id: "bilingual",
+      icon: Languages,
+      title: t.landing.f1Title,
+      body: t.landing.f1Body,
+    },
+    {
+      id: "corrections",
       icon: MessageSquareQuote,
       title: t.landing.f2Title,
       body: t.landing.f2Body,
     },
-    { icon: Bug, title: t.landing.f3Title, body: t.landing.f3Body },
-    { icon: Repeat2, title: t.landing.f4Title, body: t.landing.f4Body },
+    {
+      id: "mistakes",
+      icon: Bug,
+      title: t.landing.f3Title,
+      body: t.landing.f3Body,
+    },
+    {
+      id: "repetition",
+      icon: Repeat2,
+      title: t.landing.f4Title,
+      body: t.landing.f4Body,
+    },
   ];
 
   return (
@@ -252,8 +281,8 @@ function Features() {
         viewport={viewportOnce}
         className="mt-12 grid gap-5 sm:grid-cols-2"
       >
-        {features.map(({ icon: Icon, title, body }) => (
-          <motion.div key={title} variants={fadeUp}>
+        {features.map(({ id, icon: Icon, title, body }) => (
+          <motion.div key={id} variants={fadeUp}>
             <Card className="rounded-2xl border-border/70 h-full shadow-none">
               <CardContent className="p-6">
                 <span className="bg-accent text-accent-foreground mb-4 grid size-11 place-items-center rounded-xl">

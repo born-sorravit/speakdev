@@ -74,6 +74,9 @@ interface AppState {
    */
   locale: Locale;
   setLocale: (locale: Locale) => void;
+  /** Desktop sidebar rail. Persisted so the choice survives a reload. */
+  sidebarCollapsed: boolean;
+  toggleSidebar: () => void;
   profile: UserProfile;
 
   lessons: Record<string, LessonProgress>;
@@ -157,6 +160,7 @@ const initialState = {
   hasHydrated: false,
   isAuthenticated: false,
   locale: "th" as Locale,
+  sidebarCollapsed: false,
   profile: DEFAULT_PROFILE,
   lessons: {} as Record<string, LessonProgress>,
   vocabulary: {} as Record<string, UserVocabulary>,
@@ -223,6 +227,9 @@ export const useAppStore = create<AppState>()(
         setHasHydrated: (value) => set({ hasHydrated: value }),
 
         setLocale: (locale) => set({ locale }),
+
+        toggleSidebar: () =>
+          set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
 
         signIn: (email, name) =>
           set((state) => ({
@@ -453,6 +460,7 @@ export const useAppStore = create<AppState>()(
             // Resetting progress should not also throw away the person's
             // language choice or sign them out.
             locale: state.locale,
+            sidebarCollapsed: state.sidebarCollapsed,
             isAuthenticated: state.isAuthenticated,
             hasHydrated: true,
           })),
@@ -475,6 +483,7 @@ export const useAppStore = create<AppState>()(
       partialize: (state) => ({
         isAuthenticated: state.isAuthenticated,
         locale: state.locale,
+        sidebarCollapsed: state.sidebarCollapsed,
         profile: state.profile,
         lessons: state.lessons,
         vocabulary: state.vocabulary,
